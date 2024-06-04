@@ -1,14 +1,14 @@
 .global _main
-.p2align 3
+.align 2
 
 _main:
-    adr X1, helloworld
-    mov X2, #13
-    mov X16, #4     // MacOS write system call
+    adr x1, helloworld
+    mov x2, #13
+    mov x16, #4
     svc 0
 
-    mov X0, #0
-    mov X16, #1
+    mov x0, #0
+    mov x16, #1
     svc 0
 
 helloworld:
