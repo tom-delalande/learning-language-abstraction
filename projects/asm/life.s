@@ -3,6 +3,11 @@
 
 _main:
     ldr x28, grid
+    mov x1, #1
+    lsl x1, x1, #5
+    lsl x1, x1, #7
+    orr x28, x28, x1
+
     bl print_grid
 
 print_grid:
@@ -109,9 +114,5 @@ clear:
 
 .equ GRID_WIDTH, 64
 
-array: 
-    .space GRID_WIDTH * GRID_WIDTH
-
-
 grid:
-   .space 512
+   .fill 32
