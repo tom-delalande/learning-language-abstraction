@@ -8,7 +8,20 @@ _main:
     lsl x1, x1, #7
     orr x28, x28, x1
 
-    bl print_grid
+    ; init grid
+    mov x18, #0
+    mov x19, #GRID_WIDTH
+    b init_grid_loop
+
+init_grid_loop:
+    cmp x18, x19
+    b.ge print_grid
+
+    mov x0, #42
+    str x0, [sp]
+
+    add x18, x18, #1
+    b init_grid_loop
 
 print_grid:
     mov x18, #0
