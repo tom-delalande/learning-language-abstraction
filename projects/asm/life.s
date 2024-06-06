@@ -4,14 +4,6 @@
 _main:
     bl print_grid
 
-clear_grid:
-    mov x0, #0
-    adr x1, clear
-    mov x2, #4
-    mov x16, #4
-    svc 0
-    bl wait_for_next_frame_then_draw
-
 print_grid:
     mov x18, #0
     mov x19, #GRID_WIDTH
@@ -21,12 +13,16 @@ print_grid:
      
 print_grid_loop:
     cmp x18, x19
-    b.ge wait_for_next_frame_then_clear
+    b.ge print_grid_loop_finished
 
     bl print_cell
 
     add x20, x20, #1
     b print_row
+
+print_grid_loop_finished:
+    ldr x19, =0x3B9ACA00 ; this is a phat number
+    b delay_then_clear
 
 print_row:
     cmp x20, x21
@@ -57,24 +53,18 @@ print_cell:
     mov x0, #0
     ret
 
-wait_for_next_frame_then_clear:
-     mov x19, #10000
-     b delay_then_clear
-
 delay_then_clear:
     subs x19, x19, #1
-    bne delay_then_clear
+    b.ne delay_then_clear
 
     bl clear_grid
 
-wait_for_next_frame_then_draw:
-     mov x19, #10000
-     b delay_then_draw
-
-delay_then_draw:
-    subs x19, x19, #1
-    bne delay_then_draw
-
+clear_grid:
+    mov x0, #0
+    adr x1, clear
+    mov x2, #4
+    mov x16, #4
+    svc 0
     bl print_grid
 
 exit:
@@ -102,7 +92,7 @@ line:
 clear:
     .asciz  "\x1b[2J"
 
-.equ GRID_WIDTH, 16
+.equ GRID_WIDTH, 64
 
 array: 
     .space GRID_WIDTH * GRID_WIDTH
