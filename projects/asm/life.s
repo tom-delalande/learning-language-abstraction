@@ -81,16 +81,16 @@ fail:
 
 
 empty:
-    .ascii  "0"
+    .ascii "-"
 
 filled:
-    .ascii  "X"
+    .ascii "X"
 
 line:
-    .ascii  "\n"
+    .ascii "\n"
 
 clear:
-    .asciz  "\x1b[2J"
+    .asciz "\x1b[2J"
 
 .equ GRID_WIDTH, 64
 
