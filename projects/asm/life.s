@@ -3,10 +3,11 @@
 
 _main:
     mov x18, #0
-    mov x19, #9
+    mov x19, #GRID_WIDTH
     mov x20, #0
-    mov x21, #9
+    mov x21, #GRID_WIDTH
     bl print_grid
+
     bl exit
 
 print_grid:
@@ -58,3 +59,9 @@ filled:
 
 line:
     .ascii  "\n"
+
+.equ GRID_WIDTH, 4
+
+array: 
+    .space GRID_WIDTH * GRID_WIDTH
+
