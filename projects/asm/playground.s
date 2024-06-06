@@ -2,13 +2,13 @@
 .align 2
 
 _main:
-    mov x0, #0b01010101
+    mov x16, #0b01010101
 
-    mov x1, #2
-    lsr x2, x0, x1
-    and x2, x2, #1
+    mov x15, #0
+    lsr x14, x16, x15
+    and x14, x14, #1
 
-    cmp x2, #0
+    cmp x14, #0
     beq print_empty
     b print_filled
 

@@ -2,8 +2,7 @@
 .align 2
 
 _main:
-    ldr x16, =grid
-    mov x15, #0
+    ldr x28, grid
     bl print_grid
 
 print_grid:
@@ -29,9 +28,14 @@ print_row:
     cmp x20, x21
     b.ge print_row_finished
 
-    ; cmp x20, #0
-    b.eq print_cell_filled
-    b print_cell_empty
+    lsr x14, x28, x15
+    and x14, x14, #1
+
+    add x15, x15, #1
+
+    cmp x14, #0
+    b.eq print_cell_empty
+    b print_cell_filled
 
 print_row_finished:
     adr x1, line
@@ -110,4 +114,4 @@ array:
 
 
 grid:
-   .fill 512, 0
+   .space 512
