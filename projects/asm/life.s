@@ -21,7 +21,7 @@ init_grid_loop:
 
     mov x0, #0
     mov x1, #1
-    lsl x1, x1, #60
+    lsl x1, x1, #10
     orr x0, x0, x1
 
     str x0, [sp]
@@ -50,7 +50,7 @@ print_grid_loop:
     b update_row
 
 print_grid_loop_finished:
-    mov x1, #65
+    mov x1, #64
     mov x2, #16
     mul x3, x1, x2
     sub sp, sp, x3
