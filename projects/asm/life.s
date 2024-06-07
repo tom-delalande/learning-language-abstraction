@@ -130,14 +130,14 @@ update_row:
     b.eq process_live_cell
 
     ; process dead cell
-    cmp x15, #3
+    cmp x14, #3
     b.eq revive_cell
 
     add x20, x20, #1 ; increment and loop
     b update_row
 
 process_live_cell:
-    cmp x15, #2
+    cmp x14, #2
     b.lt kill_cell
 
     cmp x14, #3
