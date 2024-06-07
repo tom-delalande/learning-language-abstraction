@@ -98,8 +98,8 @@ update_row:
     lsr x13, x28, x20 ; store the current bit in x13 by moving bit right
 
     ; x14 is neighbour counter
-    lsr x14, x30, x20 ; previous row same index store in x14 which is counter
-    lsr x15, x31, x20 ; next row same index
+    lsr x14, x30, x20 ; row: -1, col: 0
+    lsr x15, x31, x20 ; row: +1, col: 0
     add x14, x14, x15 ; add to counter
 
     add x20, x20, #1
@@ -126,7 +126,7 @@ update_row:
 
     add x20, x20, #1
 
-    cmp x13, #0
+    cmp x13, #1
     b.eq process_live_cell
 
     ; process dead cell
@@ -150,7 +150,7 @@ kill_cell:
     mov x3, #1
     lsl x3, x3, x20
     mvn x3, x3
-    and x29, x28, x3
+    and x29, x29, x3
 
     add x20, x20, #1 ; increment and loop
     b update_row
@@ -175,7 +175,7 @@ print_row:
     cmp x20, x21
     b.ge print_row_finished
 
-    lsr x14, x29, x20
+    lsr x14, x28, x20
     and x14, x14, #1
 
     add x15, x15, #1
