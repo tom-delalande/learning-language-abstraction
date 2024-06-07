@@ -19,11 +19,40 @@ init_grid_loop:
     cmp x18, x19
     b.ge print_grid
 
-    mov x0, #0
-    mov x1, #1
-    lsl x1, x1, #10
-    orr x0, x0, x1
+    cmp x18, #8
+    b.eq set_row_8
 
+    cmp x18, #9
+    b.eq set_row_9
+
+    cmp x18, #10
+    b.eq set_row_10
+
+    mov x0, #0
+    str x0, [sp]
+    sub sp, sp, #16
+
+    add x18, x18, #1
+    b init_grid_loop
+
+set_row_8:
+    mov x0, #0b01000
+    str x0, [sp]
+    sub sp, sp, #16
+
+    add x18, x18, #1
+    b init_grid_loop
+
+set_row_9:
+    mov x0, #0b010000
+    str x0, [sp]
+    sub sp, sp, #16
+
+    add x18, x18, #1
+    b init_grid_loop
+
+set_row_10:
+    mov x0, #0b011100
     str x0, [sp]
     sub sp, sp, #16
 
@@ -46,6 +75,11 @@ print_grid_loop:
 
     ldr x28, [sp]
     ldr x29, [sp]
+    sub sp, sp, #16
+    ldr x30, [sp]
+    add sp, sp, #32
+    ldr x31, [sp]
+    sub sp, sp, #16
 
     b update_row
 
@@ -61,28 +95,72 @@ update_row:
     cmp x20, x21
     b.ge update_row_finished
 
-    lsr x14, x28, x20 ; store the current bit in x14 by moving bit right
+    lsr x13, x28, x20 ; store the current bit in x13 by moving bit right
 
-    cmp x14, #1 ; compare x14 with 1
-    b.eq move_cell_left
-    
+    ; x14 is neighbour counter
+    lsr x14, x30, x20 ; previous row same index store in x14 which is counter
+    lsr x15, x31, x20 ; next row same index
+    add x14, x14, x15 ; add to counter
+
+    add x20, x20, #1
+
+    lsr x15, x28, x20
+    add x14, x14, x15
+
+    lsr x15, x30, x20
+    add x14, x14, x15
+
+    lsr x15, x31, x20
+    add x14, x14, x15
+
+    sub x20, x20, #2
+
+    lsr x15, x28, x20
+    add x14, x14, x15
+
+    lsr x15, x30, x20
+    add x14, x14, x15
+
+    lsr x15, x31, x20
+    add x14, x14, x15
+
+    add x20, x20, #1
+
+    cmp x13, #0
+    b.eq process_live_cell
+
+    ; process dead cell
+    cmp x15, #3
+    b.eq revive_cell
+
     add x20, x20, #1 ; increment and loop
     b update_row
 
-move_cell_left:
+process_live_cell:
+    cmp x15, #2
+    b.lt kill_cell
+
+    cmp x14, #3
+    b.gt kill_cell
+
+    add x20, x20, #1 ; increment and loop
+    b update_row
+
+kill_cell:
     mov x3, #1
     lsl x3, x3, x20
     mvn x3, x3
     and x29, x28, x3
 
-    sub x20, x20, #1
+    add x20, x20, #1 ; increment and loop
+    b update_row
 
+revive_cell:
     mov x3, #1
     lsl x3, x3, x20
     orr x29, x29, x3
 
-    add x20, x20, #2
-
+    add x20, x20, #1 ; increment and loop
     b update_row
 
 update_row_finished:
