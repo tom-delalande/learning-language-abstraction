@@ -1,9 +1,13 @@
 .global _main
 .align 2
 
-; x28: grid
+; x28: current row
 ; x18: outer loop counter
 ; x19: inner loop counter
+
+; x29: current row copy
+; x30: previous row
+; x31: next row
 
 _main:
     ; init grid
@@ -17,19 +21,16 @@ init_grid_loop:
 
     mov x0, #0
     mov x1, #1
-    lsl x1, x1, x18
+    lsl x1, x1, #60
     orr x0, x0, x1
 
-    sub sp, sp, #16
     str x0, [sp]
+    sub sp, sp, #16
 
     add x18, x18, #1
     b init_grid_loop
 
 print_grid:
-    ldr x28, [sp]
-    add sp, sp, #16
-
     mov x18, #0
     mov x19, #GRID_WIDTH
     mov x20, #0
@@ -38,13 +39,15 @@ print_grid:
     bl print_grid_loop
 
 print_grid_loop:
-    cmp x18, x19
+    cmp x18, x19 ; for each row
     b.ge print_grid_loop_finished
 
     add x20, x20, #1
+
     ldr x28, [sp]
-    add sp, sp, #16
-    b print_row
+    ldr x29, [sp]
+
+    b update_row
 
 print_grid_loop_finished:
     mov x1, #65
@@ -54,11 +57,47 @@ print_grid_loop_finished:
     ldr x19, =0x3B9ACA00 ; this is a phat number
     b delay_then_clear
 
+update_row:
+    cmp x20, x21
+    b.ge update_row_finished
+
+    lsr x14, x28, x20 ; store the current bit in x14 by moving bit right
+
+    cmp x14, #1 ; compare x14 with 1
+    b.eq move_cell_left
+    
+    add x20, x20, #1 ; increment and loop
+    b update_row
+
+move_cell_left:
+    mov x3, #1
+    lsl x3, x3, x20
+    mvn x3, x3
+    and x29, x28, x3
+
+    sub x20, x20, #1
+
+    mov x3, #1
+    lsl x3, x3, x20
+    orr x29, x29, x3
+
+    add x20, x20, #2
+
+    b update_row
+
+update_row_finished:
+    str x29, [sp]
+    add sp, sp, #16
+
+    mov x20, #0
+    mov x21, #GRID_WIDTH
+    b print_row
+
 print_row:
     cmp x20, x21
     b.ge print_row_finished
 
-    lsr x14, x28, x20
+    lsr x14, x29, x20
     and x14, x14, #1
 
     add x15, x15, #1
