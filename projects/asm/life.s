@@ -17,7 +17,7 @@ init_grid_loop:
 
     mov x0, #0
     mov x1, #1
-    lsl x1, x1, #5
+    lsl x1, x1, x18
     orr x0, x0, x1
 
     sub sp, sp, #16
@@ -28,6 +28,7 @@ init_grid_loop:
 
 print_grid:
     ldr x28, [sp]
+    add sp, sp, #16
 
     mov x18, #0
     mov x19, #GRID_WIDTH
@@ -42,9 +43,14 @@ print_grid_loop:
 
     add x20, x20, #1
     ldr x28, [sp]
+    add sp, sp, #16
     b print_row
 
 print_grid_loop_finished:
+    mov x1, #65
+    mov x2, #16
+    mul x3, x1, x2
+    sub sp, sp, x3
     ldr x19, =0x3B9ACA00 ; this is a phat number
     b delay_then_clear
 
