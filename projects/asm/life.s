@@ -1,13 +1,11 @@
 .global _main
 .align 2
 
-_main:
-    ldr x28, grid
-    mov x1, #1
-    lsl x1, x1, #5
-    lsl x1, x1, #7
-    orr x28, x28, x1
+; x28: grid
+; x18: outer loop counter
+; x19: inner loop counter
 
+_main:
     ; init grid
     mov x18, #0
     mov x19, #GRID_WIDTH
@@ -17,13 +15,20 @@ init_grid_loop:
     cmp x18, x19
     b.ge print_grid
 
-    mov x0, #42
+    mov x0, #0
+    mov x1, #1
+    lsl x1, x1, #5
+    orr x0, x0, x1
+
+    sub sp, sp, #16
     str x0, [sp]
 
     add x18, x18, #1
     b init_grid_loop
 
 print_grid:
+    ldr x28, [sp]
+
     mov x18, #0
     mov x19, #GRID_WIDTH
     mov x20, #0
@@ -36,6 +41,7 @@ print_grid_loop:
     b.ge print_grid_loop_finished
 
     add x20, x20, #1
+    ldr x28, [sp]
     b print_row
 
 print_grid_loop_finished:
@@ -46,7 +52,7 @@ print_row:
     cmp x20, x21
     b.ge print_row_finished
 
-    lsr x14, x28, x15
+    lsr x14, x28, x20
     and x14, x14, #1
 
     add x15, x15, #1
