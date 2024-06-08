@@ -65,21 +65,20 @@ print_grid:
     mov x20, #0
     mov x21, #GRID_WIDTH
     mov x15, #0
+
+    ldr x28, [sp]
+    ldr x29, [sp]
+    sub sp, sp, #16
+    ldr x5, [sp]
+    add sp, sp, #32
+    ldr x4, [sp]
+    sub sp, sp, #16
+
     bl print_grid_loop
 
 print_grid_loop:
     cmp x18, x19 ; for each row
     b.ge print_grid_loop_finished
-
-    add x20, x20, #1
-
-    ldr x28, [sp]
-    ldr x29, [sp]
-    sub sp, sp, #16
-    ldr x30, [sp]
-    add sp, sp, #32
-    ldr x31, [sp]
-    sub sp, sp, #16
 
     b update_row
 
@@ -147,25 +146,23 @@ process_live_cell:
     b update_row
 
 kill_cell:
-    mov x3, #1
-    lsl x3, x3, x20
-    mvn x3, x3
-    and x29, x29, x3
+    ; mov x3, #1
+    ; lsl x3, x3, x20
+    ; mvn x3, x3
+    ; and x29, x29, x3
 
     add x20, x20, #1 ; increment and loop
     b update_row
 
 revive_cell:
-    mov x3, #1
-    lsl x3, x3, x20
-    orr x29, x29, x3
+    ; mov x3, #1
+    ; lsl x3, x3, x20
+    ; orr x29, x29, x3
 
     add x20, x20, #1 ; increment and loop
     b update_row
 
 update_row_finished:
-    str x29, [sp]
-    add sp, sp, #16
 
     mov x20, #0
     mov x21, #GRID_WIDTH
@@ -191,6 +188,16 @@ print_row_finished:
 
     svc 0
     mov x0, #0
+
+    str x29, [sp]
+    add sp, sp, #16
+
+    ldr x29, [sp]
+    mov x28, x4
+
+    add sp, sp, #16
+    ldr x4, [sp]
+    sub sp, sp, #16
 
     add x18, x18, #1
     mov x20, #0
@@ -223,6 +230,7 @@ delay_then_clear:
     bl clear_grid
 
 clear_grid:
+    b exit
     mov x0, #0
     adr x1, clear
     mov x2, #4
