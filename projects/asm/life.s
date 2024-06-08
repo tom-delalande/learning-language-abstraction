@@ -96,7 +96,6 @@ update_row:
 
     lsr x13, x28, x20 ; store the current bit in x13 by moving bit right
 
-    ; x14 is neighbour counter
     lsr x14, x5, x20 ; row: -1, col: 0
     lsr x15, x4, x20 ; row: +1, col: 0
     add x14, x14, x15 ; add to counter
