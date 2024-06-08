@@ -1,13 +1,13 @@
 .global _main
 .align 2
 
-; x28: current row
+; x6: current row
 ; x18: outer loop counter
 ; x19: inner loop counter
 
-; x29: current row copy
-; x30: previous row
-; x31: next row
+; x7: current row edit
+; x5: previous row
+; x4: next row
 
 _main:
     ; init grid
@@ -95,33 +95,46 @@ update_row:
     b.ge update_row_finished
 
     lsr x13, x6, x20 ; store the current bit in x13 by moving bit right
+    and x13, x13, #1
 
     ; use playground to validate this code
 
-    lsr x14, x5, x20 ; row: -1, col: 0
+    mov x14, #0
+
+    lsr x15, x5, x20 ; row: -1, col: 0
+    and x15, x15, #1
+    add x14, x14, x15 ; add to counter
+
     lsr x15, x4, x20 ; row: +1, col: 0
+    and x15, x15, #1
     add x14, x14, x15 ; add to counter
 
     add x20, x20, #1
 
     lsr x15, x6, x20
+    and x15, x15, #1
     add x14, x14, x15
 
     lsr x15, x5, x20
+    and x15, x15, #1
     add x14, x14, x15
 
     lsr x15, x4, x20
+    and x15, x15, #1
     add x14, x14, x15
 
     sub x20, x20, #2
 
     lsr x15, x6, x20
+    and x15, x15, #1
     add x14, x14, x15
 
     lsr x15, x5, x20
+    and x15, x15, #1
     add x14, x14, x15
 
     lsr x15, x4, x20
+    and x15, x15, #1
     add x14, x14, x15
 
     add x20, x20, #1
