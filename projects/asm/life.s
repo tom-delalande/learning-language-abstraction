@@ -97,8 +97,8 @@ update_row:
     lsr x13, x28, x20 ; store the current bit in x13 by moving bit right
 
     ; x14 is neighbour counter
-    lsr x14, x30, x20 ; row: -1, col: 0
-    lsr x15, x31, x20 ; row: +1, col: 0
+    lsr x14, x5, x20 ; row: -1, col: 0
+    lsr x15, x4, x20 ; row: +1, col: 0
     add x14, x14, x15 ; add to counter
 
     add x20, x20, #1
@@ -106,10 +106,10 @@ update_row:
     lsr x15, x28, x20
     add x14, x14, x15
 
-    lsr x15, x30, x20
+    lsr x15, x5, x20
     add x14, x14, x15
 
-    lsr x15, x31, x20
+    lsr x15, x4, x20
     add x14, x14, x15
 
     sub x20, x20, #2
@@ -117,10 +117,10 @@ update_row:
     lsr x15, x28, x20
     add x14, x14, x15
 
-    lsr x15, x30, x20
+    lsr x15, x5, x20
     add x14, x14, x15
 
-    lsr x15, x31, x20
+    lsr x15, x4, x20
     add x14, x14, x15
 
     add x20, x20, #1
@@ -146,24 +146,23 @@ process_live_cell:
     b update_row
 
 kill_cell:
-    ; mov x3, #1
-    ; lsl x3, x3, x20
-    ; mvn x3, x3
-    ; and x29, x29, x3
+    mov x3, #1
+    lsl x3, x3, x20
+    mvn x3, x3
+    and x29, x29, x3
 
     add x20, x20, #1 ; increment and loop
     b update_row
 
 revive_cell:
-    ; mov x3, #1
-    ; lsl x3, x3, x20
-    ; orr x29, x29, x3
+    mov x3, #1
+    lsl x3, x3, x20
+    orr x29, x29, x3
 
     add x20, x20, #1 ; increment and loop
     b update_row
 
 update_row_finished:
-
     mov x20, #0
     mov x21, #GRID_WIDTH
     b print_row
@@ -192,8 +191,9 @@ print_row_finished:
     str x29, [sp]
     add sp, sp, #16
 
-    ldr x29, [sp]
+    mov x5, x28
     mov x28, x4
+    mov x29, x4
 
     add sp, sp, #16
     ldr x4, [sp]
@@ -230,7 +230,6 @@ delay_then_clear:
     bl clear_grid
 
 clear_grid:
-    b exit
     mov x0, #0
     adr x1, clear
     mov x2, #4
