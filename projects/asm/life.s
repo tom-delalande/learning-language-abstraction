@@ -66,8 +66,8 @@ print_grid:
     mov x21, #GRID_WIDTH
     mov x15, #0
 
-    ldr x28, [sp]
-    ldr x29, [sp]
+    ldr x6, [sp]
+    ldr x7, [sp]
     sub sp, sp, #16
     ldr x5, [sp]
     add sp, sp, #32
@@ -94,7 +94,9 @@ update_row:
     cmp x20, x21
     b.ge update_row_finished
 
-    lsr x13, x28, x20 ; store the current bit in x13 by moving bit right
+    lsr x13, x6, x20 ; store the current bit in x13 by moving bit right
+
+    ; use playground to validate this code
 
     lsr x14, x5, x20 ; row: -1, col: 0
     lsr x15, x4, x20 ; row: +1, col: 0
@@ -102,7 +104,7 @@ update_row:
 
     add x20, x20, #1
 
-    lsr x15, x28, x20
+    lsr x15, x6, x20
     add x14, x14, x15
 
     lsr x15, x5, x20
@@ -113,7 +115,7 @@ update_row:
 
     sub x20, x20, #2
 
-    lsr x15, x28, x20
+    lsr x15, x6, x20
     add x14, x14, x15
 
     lsr x15, x5, x20
@@ -148,7 +150,7 @@ kill_cell:
     mov x3, #1
     lsl x3, x3, x20
     mvn x3, x3
-    and x29, x29, x3
+    and x7, x7, x3
 
     add x20, x20, #1 ; increment and loop
     b update_row
@@ -156,7 +158,7 @@ kill_cell:
 revive_cell:
     mov x3, #1
     lsl x3, x3, x20
-    orr x29, x29, x3
+    orr x7, x7, x3
 
     add x20, x20, #1 ; increment and loop
     b update_row
@@ -170,7 +172,7 @@ print_row:
     cmp x20, x21
     b.ge print_row_finished
 
-    lsr x14, x28, x20
+    lsr x14, x6, x20
     and x14, x14, #1
 
     add x15, x15, #1
@@ -187,12 +189,12 @@ print_row_finished:
     svc 0
     mov x0, #0
 
-    str x29, [sp]
+    str x7, [sp]
     add sp, sp, #16
 
-    mov x5, x28
-    mov x28, x4
-    mov x29, x4
+    mov x5, x6
+    mov x6, x4
+    mov x7, x4
 
     add sp, sp, #16
     ldr x4, [sp]
