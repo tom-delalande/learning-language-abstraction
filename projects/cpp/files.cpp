@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -33,19 +34,22 @@ public:
   Directory(const std::string &name, const std::string &path)
       : Item(name, path) {}
   void addChild(std::shared_ptr<Item> child) { children.push_back(child); }
-  void display(int cursor, bool renaming, std::string rename_text) {
+  void display(int cursor, bool renaming, bool creating, std::string buffer) {
     int i = 0;
     for (const auto &child : children) {
       std::string childName = child->displayName();
       if (i == cursor) {
         std::cout << "\033[7m" +
-                         (renaming ? "*" + rename_text : child->displayName()) +
+                         (renaming ? "*" + buffer : child->displayName()) +
                          "\033[0m"
                   << std::endl;
       } else {
         std::cout << child->displayName() << std::endl;
       }
       i++;
+    }
+    if (creating) {
+      std::cout << buffer << std::endl;
     }
   }
   std::string getName(int cursor) { return children[cursor]->name; }
@@ -55,6 +59,22 @@ public:
     std::filesystem::rename(children[cursor]->name, new_name);
     children[cursor]->name = new_name;
   }
+
+  void create(std::string path, std::string buffer) {
+    if (buffer[buffer.length() - 1] == '/') {
+      buffer.pop_back();
+      std::filesystem::create_directory(buffer);
+      std::shared_ptr<Directory> new_dir =
+          std::make_shared<Directory>(buffer, path);
+      children.push_back(new_dir);
+    } else {
+      std::ofstream file(buffer);
+      file.close();
+      std::shared_ptr<File> new_file = std::make_shared<File>(buffer, 0);
+      children.push_back(new_file);
+    }
+  }
+
   void delete_item(int cursor) {
     std::filesystem::remove(children[cursor]->name);
     children.erase(children.begin() + cursor);
@@ -122,24 +142,29 @@ int main(int argc, char *argv[]) {
   }
 
   bool renaming = false;
-  std::string rename_text;
-  std::string previous_name;
+  bool creating = false;
+  std::string buffer;
 
   clear();
-  directory->display(cursor, renaming, rename_text);
+  directory->display(cursor, renaming, creating, buffer);
 
   while (1) {
     char c = getchar();
-    if (renaming) {
+    if (renaming || creating) {
       if (c == 10) {
-        directory->rename(cursor, rename_text);
-        renaming = false;
+        if (renaming) {
+          directory->rename(cursor, buffer);
+          renaming = false;
+        } else if (creating) {
+          directory->create(directory->path, buffer);
+          creating = false;
+        }
       } else if (c == 27) {
         renaming = false;
       } else if (c == 127) {
-        rename_text.pop_back();
+        buffer.pop_back();
       } else {
-        rename_text.push_back(c);
+        buffer.push_back(c);
       }
     } else {
       if (c == 'q') {
@@ -153,14 +178,13 @@ int main(int argc, char *argv[]) {
       }
       if (c == 'r') {
         renaming = true;
-        rename_text = directory->getName(cursor);
-        previous_name = directory->getName(cursor);
+        buffer = directory->getName(cursor);
       }
       if (c == 'd') {
         directory->delete_item(cursor);
       }
       if (c == 'a') {
-        directory->delete_item(cursor);
+        creating = true;
       }
       if (c == 10) {
         if (directory->children[cursor]->path != "") {
@@ -174,7 +198,7 @@ int main(int argc, char *argv[]) {
       }
     }
     clear();
-    directory->display(cursor, renaming, rename_text);
+    directory->display(cursor, renaming, creating, buffer);
   }
 
   return 0;
