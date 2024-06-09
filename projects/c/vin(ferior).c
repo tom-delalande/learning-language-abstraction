@@ -37,6 +37,58 @@ void print(int cursor, char *filedata, int filesize, int mode,
   }
 }
 
+int moveCursorUp(int cursor, char *filedata) {
+  int currentLineStart = cursor;
+  while (currentLineStart > 0 && filedata[currentLineStart] != '\n') {
+    currentLineStart--;
+  }
+
+  int previousLineStart = currentLineStart - 1;
+  while (previousLineStart > 0 && filedata[previousLineStart] != '\n') {
+    previousLineStart--;
+  }
+
+  if (previousLineStart >= 0) {
+    int previousLineLength = currentLineStart - previousLineStart;
+    int offset = cursor - currentLineStart;
+    cursor =
+        previousLineStart +
+        ((offset > previousLineLength) ? previousLineLength - 1 : offset - 1);
+    if (filedata[cursor] == '\n') {
+      cursor += 1;
+    }
+  }
+  return cursor;
+}
+
+int moveCursorDown(int cursor, char *filedata, int filesize) {
+  int currentLineStart = cursor;
+  while (currentLineStart > 0 && filedata[currentLineStart] != '\n') {
+    currentLineStart--;
+  }
+
+  int nextLineStart = currentLineStart + 1;
+  while (nextLineStart < filesize && filedata[nextLineStart] != '\n') {
+    nextLineStart++;
+  }
+
+  int nextNextLineStart = nextLineStart + 1;
+  while (nextNextLineStart < filesize && filedata[nextNextLineStart] != '\n') {
+    nextNextLineStart++;
+  }
+
+  if (nextLineStart < filesize) {
+    int nextLineLength = nextNextLineStart - nextLineStart;
+    int offset = cursor - currentLineStart;
+    cursor = nextLineStart +
+             ((offset > nextLineLength) ? nextLineLength - 1 : offset);
+    if (filedata[cursor] == '\n') {
+      cursor += 1;
+    }
+  }
+  return cursor;
+}
+
 int main(int argc, char *argv[]) {
   struct termios orig_termios, new_termios;
   tcgetattr(STDIN_FILENO, &orig_termios);
@@ -61,6 +113,10 @@ int main(int argc, char *argv[]) {
   fread(filedata, sizeof(char), filesize, file);
 
   int cursor = 0;
+
+  // 0: Normal mode
+  // 1: Insert mode
+  // 2: Command mode
   int mode = 0;
 
   int commandsSize = 0;
@@ -82,56 +138,10 @@ int main(int argc, char *argv[]) {
           return 0;
         }
         if (c == 'k') {
-          int currentLineStart = cursor;
-          while (currentLineStart > 0 && filedata[currentLineStart] != '\n') {
-            currentLineStart--;
-          }
-
-          int previousLineStart = currentLineStart - 1;
-          while (previousLineStart > 0 && filedata[previousLineStart] != '\n') {
-            previousLineStart--;
-          }
-
-          if (previousLineStart >= 0) {
-            int previousLineLength = currentLineStart - previousLineStart;
-            int offset = cursor - currentLineStart;
-            cursor = previousLineStart +
-                     ((offset > previousLineLength) ? previousLineLength - 2
-                                                    : offset - 2) +
-                     1;
-            if (filedata[cursor] == '\n') {
-              cursor += 1;
-            }
-          }
+          cursor = moveCursorUp(cursor, filedata);
         }
         if (c == 'j') {
-          int currentLineStart = cursor;
-          while (currentLineStart > 0 && filedata[currentLineStart] != '\n') {
-            currentLineStart--;
-          }
-
-          int nextLineStart = currentLineStart + 1;
-          while (nextLineStart < filesize && filedata[nextLineStart] != '\n') {
-            nextLineStart++;
-          }
-
-          int nextNextLineStart = nextLineStart + 1;
-          while (nextNextLineStart < filesize &&
-                 filedata[nextNextLineStart] != '\n') {
-            nextNextLineStart++;
-          }
-
-          if (nextLineStart < filesize) {
-            int nextLineLength = nextNextLineStart - nextLineStart;
-            int offset = cursor - currentLineStart;
-            cursor =
-                nextLineStart +
-                ((offset > nextLineLength) ? nextLineLength - 2 : offset - 1) +
-                1;
-            if (filedata[cursor] == '\n') {
-              cursor += 1;
-            }
-          }
+          cursor = moveCursorDown(cursor, filedata, filesize);
         }
         if (c == 'l') {
           cursor += 1;
