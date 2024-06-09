@@ -170,6 +170,7 @@ int main(int argc, char *argv[]) {
                                           directory->children[cursor]->path);
           loadDirectory(directory, directory->path);
         }
+        cursor = 0;
       }
     }
     clear();
