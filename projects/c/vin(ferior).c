@@ -175,6 +175,7 @@ int main(int argc, char *argv[]) {
             fclose(file);
             return 0;
           }
+          mode = 0;
         }
       } else {
         commands[commandsSize] = c;
