@@ -14,7 +14,8 @@ void save(char *filename, FILE *file, char *filedata) {
   fprintf(file, "%s", filedata);
 }
 
-void print(int cursor, char *filedata, int filesize, int mode) {
+void print(int cursor, char *filedata, int filesize, int mode,
+           char commands[2]) {
   for (int i = 0; i <= filesize; i++) {
     char c = filedata[i];
     if (i == cursor) {
@@ -32,6 +33,7 @@ void print(int cursor, char *filedata, int filesize, int mode) {
   }
   if (mode == 2) {
     printf("\nCOMMAND");
+    printf(":%s", commands);
   }
 }
 
@@ -61,8 +63,11 @@ int main(int argc, char *argv[]) {
   int cursor = 0;
   int mode = 0;
 
+  int commandsSize = 0;
+  char commands[2];
+
   clear();
-  print(cursor, filedata, filesize, mode);
+  print(cursor, filedata, filesize, mode, commands);
 
   while (1) {
     char c = getchar();
@@ -141,16 +146,15 @@ int main(int argc, char *argv[]) {
           }
         }
       }
-      clear();
-      print(cursor, filedata, filesize, mode);
     } else if (mode == 1) {
-      if (c == 127) {
+      if (c == 27) {
+        mode = 0;
+      } else if (c == 127) {
         for (int i = cursor - 1; i <= filesize; i++) {
           filedata[i] = filedata[i + 1];
         }
         cursor -= 1;
         filesize -= 1;
-
       } else {
         for (int i = filesize; i >= cursor + 1; i--) {
           filedata[i] = filedata[i - 1];
@@ -160,18 +164,26 @@ int main(int argc, char *argv[]) {
         cursor += 1;
         filesize += 1;
       }
-      clear();
-      print(cursor, filedata, filesize, mode);
     } else if (mode == 2) {
-      if (c == 'q') {
-        save(filename, file, filedata);
-        fclose(file);
-        return 0;
+      if (c == 10) {
+        for (int i = 0; i < commandsSize; i++) {
+          char command = commands[i];
+          if (command == 'w') {
+            save(filename, file, filedata);
+          }
+          if (command == 'q') {
+            fclose(file);
+            return 0;
+          }
+        }
+      } else {
+        commands[commandsSize] = c;
+        commandsSize += 1;
       }
     }
+    clear();
+    print(cursor, filedata, filesize, mode, commands);
   }
-
-  fclose(file);
 
   return 0;
 }
