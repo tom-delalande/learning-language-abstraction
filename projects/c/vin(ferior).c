@@ -14,7 +14,7 @@ void save(char *filename, FILE *file, char *filedata) {
   fprintf(file, "%s", filedata);
 }
 
-void print(int cursor, char *filedata, int filesize) {
+void print(int cursor, char *filedata, int filesize, int mode) {
   for (int i = 0; i <= filesize; i++) {
     char c = filedata[i];
     if (i == cursor) {
@@ -22,6 +22,16 @@ void print(int cursor, char *filedata, int filesize) {
     } else {
       printf("%c", c);
     }
+  }
+
+  if (mode == 0) {
+    printf("\nNORMAL");
+  }
+  if (mode == 1) {
+    printf("\nINSERT");
+  }
+  if (mode == 2) {
+    printf("\nCOMMAND");
   }
 }
 
@@ -52,14 +62,14 @@ int main(int argc, char *argv[]) {
   int mode = 0;
 
   clear();
-  print(cursor, filedata, filesize);
+  print(cursor, filedata, filesize, mode);
 
   while (1) {
     char c = getchar();
     if (mode == 0) {
       if (c == ':') {
         mode = 2;
-      } else if (c == 'a') {
+      } else if (c == 'i') {
         mode = 1;
       } else {
         if (c == 'q') {
@@ -130,12 +140,28 @@ int main(int argc, char *argv[]) {
             cursor -= 1;
           }
         }
-        clear();
-        print(cursor, filedata, filesize);
       }
-    } else if (mode == 1) {
       clear();
-      print(cursor, filedata, filesize);
+      print(cursor, filedata, filesize, mode);
+    } else if (mode == 1) {
+      if (c == 127) {
+        for (int i = cursor - 1; i <= filesize; i++) {
+          filedata[i] = filedata[i + 1];
+        }
+        cursor -= 1;
+        filesize -= 1;
+
+      } else {
+        for (int i = filesize; i >= cursor + 1; i--) {
+          filedata[i] = filedata[i - 1];
+        }
+
+        filedata[cursor + 1] = c;
+        cursor += 1;
+        filesize += 1;
+      }
+      clear();
+      print(cursor, filedata, filesize, mode);
     } else if (mode == 2) {
       if (c == 'q') {
         save(filename, file, filedata);
