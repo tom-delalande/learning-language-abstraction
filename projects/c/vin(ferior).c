@@ -15,11 +15,10 @@ void save(char *filename, FILE *file, char *filedata) {
 }
 
 void print(int cursor, char *filedata, int filesize) {
-  /* printf("%s", filedata); */
   for (int i = 0; i <= filesize; i++) {
     char c = filedata[i];
     if (i == cursor) {
-      printf("%s", "█");
+      printf("\033[7m%c\033[0m", c);
     } else {
       printf("%c", c);
     }
@@ -58,8 +57,8 @@ int main(int argc, char *argv[]) {
   while (1) {
     char c = getchar();
     if (mode == 0) {
-      if (c == 'w') {
-        save(filename, file, filedata);
+      if (c == ':') {
+        mode = 2;
       } else if (c == 'a') {
         mode = 1;
       } else {
@@ -83,8 +82,11 @@ int main(int argc, char *argv[]) {
             int offset = cursor - currentLineStart;
             cursor = previousLineStart +
                      ((offset > previousLineLength) ? previousLineLength - 2
-                                                    : offset - 1) +
+                                                    : offset - 2) +
                      1;
+            if (filedata[cursor] == '\n') {
+              cursor += 1;
+            }
           }
         }
         if (c == 'j') {
@@ -134,6 +136,12 @@ int main(int argc, char *argv[]) {
     } else if (mode == 1) {
       clear();
       print(cursor, filedata, filesize);
+    } else if (mode == 2) {
+      if (c == 'q') {
+        save(filename, file, filedata);
+        fclose(file);
+        return 0;
+      }
     }
   }
 
