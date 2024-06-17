@@ -13,26 +13,35 @@ _main:
     ; init grid
     mov x18, #0
     mov x19, #GRID_WIDTH
+    mov x17, #0
     b init_grid_loop
 
 init_grid_loop:
     cmp x18, x19
     b.ge print_grid
 
-    cmp x18, #8
+    cmp x17, #3
+    b.eq reset_x17
+
+    cmp x17, #0
     b.eq set_row_8
 
-    cmp x18, #9
+    cmp x17, #1
     b.eq set_row_9
 
-    cmp x18, #10
+    cmp x17, #2
     b.eq set_row_10
+
 
     mov x0, #0
     str x0, [sp]
     sub sp, sp, #16
 
     add x18, x18, #1
+    b init_grid_loop
+
+reset_x17:
+    mov x17, #0
     b init_grid_loop
 
 set_row_8:
